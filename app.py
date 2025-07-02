@@ -1,4 +1,4 @@
-from flask import Flask, request, send_from_directory, Response
+from flask import Flask, request, send_from_directory, Response, render_template_string, redirect, url_for
 import requests
 import os
 import logging
@@ -189,6 +189,126 @@ def webhook():
             status=500, 
             mimetype='application/json'
         )
+
+@app.route('/welcome', methods=['GET'])
+def welcome_form():
+    """
+    Display a form asking for the user's name
+    
+    Returns:
+        str: HTML page with a form
+    """
+    html = '''
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Welcome Page</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                max-width: 600px;
+                margin: 0 auto;
+                padding: 20px;
+            }
+            h1 {
+                color: #333;
+            }
+            form {
+                background-color: #f5f5f5;
+                padding: 20px;
+                border-radius: 5px;
+                margin-top: 20px;
+            }
+            input[type="text"] {
+                width: 100%;
+                padding: 10px;
+                margin: 10px 0;
+                border: 1px solid #ddd;
+                border-radius: 3px;
+                box-sizing: border-box;
+            }
+            input[type="submit"] {
+                background-color: #4CAF50;
+                color: white;
+                padding: 10px 15px;
+                border: none;
+                border-radius: 3px;
+                cursor: pointer;
+            }
+            input[type="submit"]:hover {
+                background-color: #45a049;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Welcome to our Application</h1>
+        <form action="/greet" method="post">
+            <label for="name">Please enter your name:</label>
+            <input type="text" id="name" name="name" required>
+            <input type="submit" value="Submit">
+        </form>
+    </body>
+    </html>
+    '''
+    return render_template_string(html)
+
+@app.route('/greet', methods=['POST'])
+def greet_user():
+    """
+    Handle form submission and display a welcome message with the user's name
+    
+    Returns:
+        str: HTML page with a welcome message
+    """
+    name = request.form.get('name', 'Friend')
+    
+    html = f'''
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Welcome {name}</title>
+        <style>
+            body {{
+                font-family: Arial, sans-serif;
+                max-width: 600px;
+                margin: 0 auto;
+                padding: 20px;
+                text-align: center;
+            }}
+            h1 {{
+                color: #333;
+            }}
+            .welcome-message {{
+                background-color: #f5f5f5;
+                padding: 20px;
+                border-radius: 5px;
+                margin-top: 20px;
+                font-size: 18px;
+            }}
+            .button {{
+                display: inline-block;
+                background-color: #4CAF50;
+                color: white;
+                padding: 10px 15px;
+                text-decoration: none;
+                border-radius: 3px;
+                margin-top: 20px;
+            }}
+            .button:hover {{
+                background-color: #45a049;
+            }}
+        </style>
+    </head>
+    <body>
+        <h1>Welcome!</h1>
+        <div class="welcome-message">
+            Hello, <strong>{name}</strong>! We're glad you're here.
+        </div>
+        <a href="/welcome" class="button">Go Back</a>
+    </body>
+    </html>
+    '''
+    return render_template_string(html)
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
